@@ -14,10 +14,6 @@ export async function getById(id) {
   return user;
 }
 
-export async function create(data) {
-  return repository.create(data);
-}
-
 export async function update(id, data) {
   return repository.update(id, data);
 }

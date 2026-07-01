@@ -10,11 +10,6 @@ export async function findById(id) {
   return db('users').select(FIELDS).where({ id }).first();
 }
 
-export async function create(data) {
-  const [user] = await db('users').insert(data).returning('*');
-  return user;
-}
-
 export async function update(id, data) {
   const [user] = await db('users').where({ id }).update(data).returning('*');
   return user;

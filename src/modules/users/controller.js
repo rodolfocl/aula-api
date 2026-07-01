@@ -18,15 +18,6 @@ export async function getById(req, res, next) {
   }
 }
 
-export async function create(req, res, next) {
-  try {
-    const user = await service.create(req.body);
-    res.status(201).json(user);
-  } catch (err) {
-    next(err);
-  }
-}
-
 export async function update(req, res, next) {
   try {
     const user = await service.update(req.params.id, req.body);

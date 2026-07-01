@@ -1,0 +1,9 @@
+.env
+node_modules
+
+/generated/prisma
+
+.idea
+.github
+.claude
+CLAUDE.md

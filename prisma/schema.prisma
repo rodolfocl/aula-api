@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model attendance {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  session_id    String      @db.Uuid
+  enrollment_id String      @db.Uuid
+  status        String      @db.VarChar(20)
+  notes         String?
+  recorded_by   String?     @db.Uuid
+  recorded_at   DateTime    @default(now()) @db.Timestamptz(6)
+  enrollments   enrollments @relation(fields: [enrollment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users         users?      @relation(fields: [recorded_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sessions      sessions    @relation(fields: [session_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([session_id, enrollment_id], map: "uq_attendance")
+  @@index([enrollment_id], map: "idx_attendance_enrollment_id")
+  @@index([session_id], map: "idx_attendance_session_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model course_instances {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  course_id    String        @db.Uuid
+  teacher_id   String        @db.Uuid
+  year         Int           @db.SmallInt
+  period       String        @db.VarChar(50)
+  start_date   DateTime?     @db.Date
+  end_date     DateTime?     @db.Date
+  max_absences Int           @default(3) @db.SmallInt
+  status       String        @default("active") @db.VarChar(20)
+  created_at   DateTime      @default(now()) @db.Timestamptz(6)
+  courses      courses       @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        users         @relation(fields: [teacher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  enrollments  enrollments[]
+  sessions     sessions[]
+
+  @@index([teacher_id], map: "idx_instances_teacher_id")
+  @@index([year], map: "idx_instances_year")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model courses {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String             @unique @db.VarChar(150)
+  description      String?
+  active           Boolean            @default(true)
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  course_instances course_instances[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model enrollments {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  offering_id      String           @db.Uuid
+  student_id       String           @db.Uuid
+  status           String           @default("in_progress") @db.VarChar(20)
+  final_grade      Decimal?         @db.Decimal(4, 1)
+  enrolled_at      DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime         @default(now()) @db.Timestamptz(6)
+  attendance       attendance[]
+  course_instances course_instances @relation(fields: [offering_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users            users            @relation(fields: [student_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([offering_id, student_id], map: "uq_enrollment")
+  @@index([offering_id], map: "idx_enrollments_offering_id")
+  @@index([student_id], map: "idx_enrollments_student_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model sessions {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  offering_id      String           @db.Uuid
+  title            String?          @db.VarChar(200)
+  scheduled_at     DateTime         @db.Timestamptz(6)
+  duration_minutes Int?             @default(60) @db.SmallInt
+  meet_link        String?          @db.VarChar(300)
+  google_event_id  String?          @db.VarChar(200)
+  status           String           @default("scheduled") @db.VarChar(20)
+  created_at       DateTime         @default(now()) @db.Timestamptz(6)
+  attendance       attendance[]
+  course_instances course_instances @relation(fields: [offering_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([offering_id], map: "idx_sessions_offering_id")
+  @@index([scheduled_at], map: "idx_sessions_scheduled_at")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model users {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  full_name        String             @db.VarChar(100)
+  email            String             @unique @db.VarChar(150)
+  password_hash    String             @db.VarChar(255)
+  phone            String?            @db.VarChar(20)
+  photo_url        String?            @db.VarChar(500)
+  active           Boolean            @default(true)
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime           @default(now()) @db.Timestamptz(6)
+  attendance       attendance[]
+  course_instances course_instances[]
+  enrollments      enrollments[]
+}

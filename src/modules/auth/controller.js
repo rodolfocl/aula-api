@@ -17,3 +17,21 @@ export async function login(req, res, next) {
     next(err);
   }
 }
+
+export async function forgotPassword(req, res, next) {
+  try {
+    const result = await service.forgotPassword(req.body);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function resetPassword(req, res, next) {
+  try {
+    const result = await service.resetPassword(req.body);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}

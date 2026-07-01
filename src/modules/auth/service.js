@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import * as repository from './repository.js';
 import { sendPasswordResetEmail } from '../../utils/email.js';
 
-export async function register({ full_name, email, password, phone, photo_url }) {
+export async function register({ full_name, email, password, phone, photo_url, roles }) {
   const existing = await repository.findByEmail(email);
   if (existing) {
     const err = new Error('El email ya está registrado');
@@ -13,7 +13,7 @@ export async function register({ full_name, email, password, phone, photo_url })
   }
 
   const password_hash = await bcrypt.hash(password, 10);
-  return repository.create({ full_name, email, password_hash, phone, photo_url });
+  return repository.create({ full_name, email, password_hash, phone, photo_url, roles });
 }
 
 export async function login({ email, password }) {

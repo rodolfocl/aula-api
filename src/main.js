@@ -11,15 +11,17 @@ import sessionsRoutes from './modules/sessions/routes.js';
 import attendanceRoutes from './modules/attendance/routes.js';
 import morgan from 'morgan';
 
-morgan.token('data', (req) => {
-  if (['POST', 'PATCH', 'PUT'].includes(req.method)) {
-    const body = { ...req.body };
-    if (body.password) body.password = '***';
-    if (body.password_hash) body.password_hash = '***';
-    return Object.keys(body).length ? `| data: ${JSON.stringify(body)}` : '';
-  }
-  return Object.keys(req.query).length ? `| query: ${JSON.stringify(req.query)}` : '';
-});
+const morganFormat = (tokens, req, res) => {
+  const body = { ...req.body };
+  if (body.password) body.password = '***';
+  if (body.password_hash) body.password_hash = '***';
+
+  let extra = '';
+  if (Object.keys(body).length) extra = ` | data: ${JSON.stringify(body)}`;
+  else if (Object.keys(req.query).length) extra = ` | query: ${JSON.stringify(req.query)}`;
+
+  return `${tokens.method(req, res)} ${tokens.url(req, res)} ${tokens.status(req, res)} ${tokens['response-time'](req, res)} ms${extra}`;
+};
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,7 +29,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-app.use(morgan(':method :url :status :response-time ms :data'));
+app.use(morgan(morganFormat));
 
 app.use('/auth', authRoutes);
 app.use('/users', usersRoutes);

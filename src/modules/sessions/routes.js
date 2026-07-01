@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import { authMiddleware } from '../../middlewares/auth.middleware.js';
+import * as controller from './controller.js';
+
+const router = Router();
+
+router.use(authMiddleware);
+
+router.get('/instance/:instanceId', controller.getByInstance);
+router.post('/', controller.create);
+router.patch('/:id', controller.update);
+
+export default router;

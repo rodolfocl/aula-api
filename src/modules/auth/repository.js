@@ -6,7 +6,7 @@ export async function findByEmail(email) {
 
 export async function create(data) {
   const [user] = await db('users').insert(data).returning([
-    'id', 'full_name', 'email', 'phone', 'photo_url', 'active', 'created_at',
+    'id', 'full_name', 'email', 'phone', 'photo_url', 'active', 'roles', 'created_at',
   ]);
   return user;
 }

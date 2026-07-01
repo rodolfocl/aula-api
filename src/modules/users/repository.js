@@ -1,6 +1,6 @@
 import db from '../../db/db.js';
 
-const FIELDS = ['id', 'full_name', 'email', 'phone', 'photo_url', 'active', 'created_at'];
+const FIELDS = ['id', 'full_name', 'email', 'phone', 'photo_url', 'active', 'roles', 'created_at'];
 
 export async function findAll() {
   return db('users').select(FIELDS);

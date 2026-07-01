@@ -4,21 +4,17 @@ Backend de **Aula PDV** — plataforma educativa del Ministerio Pan de Vida.
 
 ## Stack
 
-- **Node.js** v24
-- **NestJS** — framework principal
-- **Prisma** — ORM y conexión a base de datos
-- **PostgreSQL 18** — base de datos en Neon
+- **Node.js** v22+
+- **Express v4** — framework HTTP
+- **Knex v3** — query builder
+- **PostgreSQL** — base de datos en Neon (serverless)
+- **JWT + bcrypt** — autenticación
 
 ## Base de datos
 
 6 tablas: `users`, `courses`, `course_instances`, `enrollments`, `sessions`, `attendance`
 
-Hospedada en [Neon](https://neon.tech) — PostgreSQL serverless gratuito.
-
-## Requisitos
-
-- Node.js 22+
-- npm
+Hospedada en [Neon](https://neon.tech).
 
 ## Instalación
 
@@ -28,28 +24,36 @@ npm install
 
 ## Variables de entorno
 
-Crea un archivo `.env` en la raíz con:
+Crea un archivo `.env` en la raíz:
 
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST/aula_pdv?sslmode=require"
+PORT=3000
+JWT_SECRET="tu_secreto"
 ```
 
 ## Desarrollo
 
 ```bash
-npm run start:dev
+npm run start:dev   # nodemon con hot-reload
+npm run start       # producción
 ```
 
-## Prisma
+## API
 
-Generar cliente después de cambios en el schema:
+Todas las rutas excepto `/auth/register` y `/auth/login` requieren header:
 
-```bash
-npx prisma generate
+```
+Authorization: Bearer <token>
 ```
 
-Sincronizar modelos desde la BD:
-
-```bash
-npx prisma db pull
-```
+| Ruta | Descripción |
+|---|---|
+| `POST /auth/register` | Registro de usuario |
+| `POST /auth/login` | Login, devuelve JWT |
+| `GET/PATCH/DELETE /users` | Gestión de usuarios |
+| `GET/POST/PATCH/DELETE /courses` | Gestión de ramos (DELETE es soft) |
+| `GET/POST/PATCH /course-instances` | Instancias de ramos |
+| `GET/POST/PATCH /enrollments` | Inscripciones de alumnos |
+| `GET/POST/PATCH /sessions` | Sesiones de clase |
+| `GET/POST/PATCH /attendance` | Asistencia |

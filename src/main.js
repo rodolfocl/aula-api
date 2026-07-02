@@ -12,15 +12,15 @@ import attendanceRoutes from './modules/attendance/routes.js';
 import morgan from 'morgan';
 
 const morganFormat = (tokens, req, res) => {
-  const body = { ...req.body };
-  if (body.password) body.password = '***';
-  if (body.password_hash) body.password_hash = '***';
-
+  const method = tokens.method(req, res);
   let extra = '';
-  if (Object.keys(body).length) extra = ` | data: ${JSON.stringify(body)}`;
-  else if (Object.keys(req.query).length) extra = ` | query: ${JSON.stringify(req.query)}`;
-
-  return `${tokens.method(req, res)} ${tokens.url(req, res)} ${tokens.status(req, res)} ${tokens['response-time'](req, res)} ms${extra}`;
+  if (['POST', 'PUT', 'PATCH'].includes(method) && Object.keys(req.body || {}).length) {
+    const body = { ...req.body };
+    if (body.password) body.password = '***';
+    if (body.password_hash) body.password_hash = '***';
+    extra = ` | body: ${JSON.stringify(body)}`;
+  }
+  return `${method} ${tokens.url(req, res)} ${tokens.status(req, res)} ${tokens['response-time'](req, res)}ms${extra}`;
 };
 
 const app = express();

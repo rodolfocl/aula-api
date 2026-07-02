@@ -1,9 +1,9 @@
 import * as repository from './repository.js';
 
-export async function getAll() {
+export async function getAll({ includeInactive = false } = {}) {
   try {
-    console.log('[UsersService] getAll — obteniendo todos los usuarios...');
-    const users = await repository.findAll();
+    console.log('[UsersService] getAll — obteniendo usuarios, includeInactive:', includeInactive);
+    const users = await repository.findAll({ includeInactive });
     console.log('[UsersService] getAll — usuarios encontrados:', users.length);
     return users;
   } catch (err) {

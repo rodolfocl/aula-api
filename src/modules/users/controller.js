@@ -2,7 +2,8 @@ import * as service from './service.js';
 
 export async function getAll(req, res, next) {
   try {
-    const users = await service.getAll();
+    const includeInactive = req.query.includeInactive === 'true';
+    const users = await service.getAll({ includeInactive });
     res.json(users);
   } catch (err) {
     next(err);

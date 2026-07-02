@@ -2,8 +2,10 @@ import db from '../../db/db.js';
 
 const FIELDS = ['id', 'full_name', 'email', 'phone', 'photo_url', 'active', 'roles', 'created_at'];
 
-export async function findAll() {
-  return db('users').select(FIELDS);
+export async function findAll({ includeInactive = false } = {}) {
+  const query = db('users').select(FIELDS).orderBy('full_name', 'asc');
+  if (!includeInactive) query.where({ active: true });
+  return query;
 }
 
 export async function findById(id) {

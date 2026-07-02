@@ -33,7 +33,10 @@ export async function getById(id) {
 export async function create(data) {
   try {
     console.log('[CourseInstancesService] create — creando instancia:', data);
-    const instance = await repository.create(data);
+    const sanitized = { ...data };
+    if (sanitized.start_date === '') sanitized.start_date = null;
+    if (sanitized.end_date === '') sanitized.end_date = null;
+    const instance = await repository.create(sanitized);
     console.log('[CourseInstancesService] create — instancia creada, id:', instance.id);
     return instance;
   } catch (err) {
@@ -45,8 +48,11 @@ export async function create(data) {
 export async function update(id, data) {
   try {
     console.log('[CourseInstancesService] update — actualizando instancia id:', id, '| campos:', Object.keys(data));
+    const sanitized = { ...data };
+    if (sanitized.start_date === '') sanitized.start_date = null;
+    if (sanitized.end_date === '') sanitized.end_date = null;
     await getById(id);
-    const instance = await repository.update(id, data);
+    const instance = await repository.update(id, sanitized);
     console.log('[CourseInstancesService] update — instancia actualizada, id:', id);
     return instance;
   } catch (err) {

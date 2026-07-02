@@ -1,7 +1,7 @@
 import * as repository from './repository.js';
 
-export async function getAll(year) {
-  return repository.findAll(year);
+export async function getAll({ year, teacherId, status } = {}) {
+  return repository.findAll({ year, teacherId, status });
 }
 
 export async function getById(id) {

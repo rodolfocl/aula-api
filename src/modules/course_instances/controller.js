@@ -1,7 +1,10 @@
 import * as service from './service.js';
 
 export async function getAll(req, res, next) {
-  try { res.json(await service.getAll(req.query.year)); } catch (err) { next(err); }
+  try {
+    const { year, teacher_id: teacherId, status } = req.query;
+    res.json(await service.getAll({ year, teacherId, status }));
+  } catch (err) { next(err); }
 }
 
 export async function getById(req, res, next) {

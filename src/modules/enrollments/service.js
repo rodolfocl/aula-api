@@ -6,6 +6,10 @@ export async function getByStudent(studentId) {
   return repository.findByStudent(studentId);
 }
 
+export async function getByInstance(instanceId) {
+  return repository.findByInstance(instanceId);
+}
+
 export async function create(data) {
   return repository.create(data);
 }

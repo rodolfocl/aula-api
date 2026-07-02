@@ -13,8 +13,25 @@ export async function findByStudent(studentId) {
       'c.name as course_name',
       'ci.year',
       'ci.period',
+      'ci.is_historical',
     )
-    .orderBy('ci.year', 'desc');
+    .orderBy([{ column: 'ci.year', order: 'desc' }, { column: 'ci.period', order: 'desc' }]);
+}
+
+export async function findByInstance(instanceId) {
+  return db('enrollments as e')
+    .join('users as u', 'e.student_id', 'u.id')
+    .leftJoin('attendance as a', 'a.enrollment_id', 'e.id')
+    .where('e.offering_id', instanceId)
+    .groupBy('e.id', 'e.student_id', 'e.status', 'u.full_name', 'u.id')
+    .select(
+      'e.id',
+      'e.student_id',
+      'e.status',
+      'u.full_name',
+      db.raw(`COUNT(CASE WHEN a.status = 'absent' THEN 1 END) as absence_count`),
+      db.raw(`COUNT(CASE WHEN a.status = 'present' THEN 1 END) as present_count`),
+    );
 }
 
 export async function findById(id) {

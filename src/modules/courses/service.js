@@ -1,7 +1,7 @@
 import * as repository from './repository.js';
 
-export async function getAll() {
-  return repository.findAll();
+export async function getAll({ includeInactive = false } = {}) {
+  return repository.findAll({ includeInactive });
 }
 
 export async function getById(id) {

@@ -1,7 +1,9 @@
 import db from '../../db/db.js';
 
-export async function findAll() {
-  return db('courses').where({ active: true }).select('*').orderBy('name');
+export async function findAll({ includeInactive = false } = {}) {
+  const query = db('courses').select('*').orderBy('name');
+  if (!includeInactive) query.where({ active: true });
+  return query;
 }
 
 export async function findById(id) {

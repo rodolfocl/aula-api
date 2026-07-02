@@ -1,7 +1,10 @@
 import * as service from './service.js';
 
 export async function getAll(req, res, next) {
-  try { res.json(await service.getAll()); } catch (err) { next(err); }
+  try {
+    const includeInactive = req.query.includeInactive === 'true';
+    res.json(await service.getAll({ includeInactive }));
+  } catch (err) { next(err); }
 }
 
 export async function getById(req, res, next) {

@@ -9,6 +9,7 @@ import courseInstancesRoutes from './modules/course_instances/routes.js';
 import enrollmentsRoutes from './modules/enrollments/routes.js';
 import sessionsRoutes from './modules/sessions/routes.js';
 import attendanceRoutes from './modules/attendance/routes.js';
+import evaluationsRoutes from './modules/evaluations/routes.js';
 import morgan from 'morgan';
 
 const morganFormat = (tokens, req, res) => {
@@ -38,6 +39,7 @@ app.use('/course-instances', courseInstancesRoutes);
 app.use('/enrollments', enrollmentsRoutes);
 app.use('/sessions', sessionsRoutes);
 app.use('/attendance', attendanceRoutes);
+app.use('/evaluations', evaluationsRoutes);
 
 app.use(errorHandler);
 

@@ -1,5 +1,29 @@
 import * as repository from './repository.js';
 
+export async function getAttendanceTable(instanceId) {
+  try {
+    console.log('[AttendanceService] getAttendanceTable — instanceId:', instanceId);
+    const table = await repository.findTableByInstance(instanceId);
+    console.log('[AttendanceService] getAttendanceTable — sesiones:', table.sesiones.length, '| filas:', table.filas.length);
+    return table;
+  } catch (err) {
+    console.error('[AttendanceService] getAttendanceTable ERROR:', err);
+    throw err;
+  }
+}
+
+export async function upsertBulk(registros) {
+  try {
+    console.log('[AttendanceService] upsertBulk — registros:', registros.length);
+    const result = await repository.upsertBulk(registros);
+    console.log('[AttendanceService] upsertBulk — guardados:', result.length);
+    return result;
+  } catch (err) {
+    console.error('[AttendanceService] upsertBulk ERROR:', err);
+    throw err;
+  }
+}
+
 export async function getByEnrollment(enrollmentId) {
   try {
     console.log('[AttendanceService] getByEnrollment — enrollmentId:', enrollmentId);

@@ -1,5 +1,13 @@
 import * as service from './service.js';
 
+export async function getAttendanceTable(req, res, next) {
+  try { res.json(await service.getAttendanceTable(req.params.id)); } catch (err) { next(err); }
+}
+
+export async function upsertBulk(req, res, next) {
+  try { res.json(await service.upsertBulk(req.body.registros ?? [])); } catch (err) { next(err); }
+}
+
 export async function getByEnrollment(req, res, next) {
   try { res.json(await service.getByEnrollment(req.params.enrollmentId)); } catch (err) { next(err); }
 }

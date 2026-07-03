@@ -6,7 +6,7 @@ export async function findByEmail(email) {
 
 export async function create(data) {
   const [user] = await db('users').insert(data).returning([
-    'id', 'full_name', 'email', 'phone', 'photo_url', 'active', 'roles', 'created_at',
+    'id', 'full_name', 'email', 'phone', 'avatar', 'active', 'roles', 'created_at',
   ]);
   return user;
 }
@@ -33,4 +33,14 @@ export async function clearResetToken(id, passwordHash) {
       reset_token_expires_at: null,
       updated_at: new Date(),
     });
+}
+
+export async function findById(id) {
+  return db('users').where({ id }).first();
+}
+
+export async function updatePassword(id, passwordHash) {
+  return db('users')
+    .where({ id })
+    .update({ password_hash: passwordHash, updated_at: new Date() });
 }

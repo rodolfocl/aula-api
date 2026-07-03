@@ -37,3 +37,25 @@ export async function remove(req, res, next) {
     next(err);
   }
 }
+
+export async function updateAvatar(req, res, next) {
+  try {
+    const userId = req.user.sub;
+    const user = await service.updateAvatar(userId, req.body.avatar);
+    res.locals.logSummary = `usuario:${userId} actualizó foto de perfil`;
+    res.json({ avatar: user.avatar });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function clearAvatar(req, res, next) {
+  try {
+    const userId = req.user.sub;
+    await service.clearAvatar(userId);
+    res.locals.logSummary = `usuario:${userId} eliminó foto de perfil`;
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}

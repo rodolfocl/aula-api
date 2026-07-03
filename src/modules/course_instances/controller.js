@@ -14,7 +14,10 @@ export async function getById(req, res, next) {
 }
 
 export async function create(req, res, next) {
-  try { res.status(201).json(await service.create(req.body)); } catch (err) { next(err); }
+  try {
+    res.locals.logSummary = `course:${req.body.course_id} year:${req.body.year}`;
+    res.status(201).json(await service.create(req.body));
+  } catch (err) { next(err); }
 }
 
 export async function update(req, res, next) {

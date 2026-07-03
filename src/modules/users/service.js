@@ -42,3 +42,50 @@ export async function remove(id) {
     throw err;
   }
 }
+
+const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const MAX_BYTES = 2 * 1024 * 1024; // 2MB del archivo original
+
+export async function updateAvatar(userId, avatar) {
+  try {
+    // Validar formato: data:<mime>;base64,<datos>
+    const match = avatar?.match(/^data:(image\/(?:jpeg|png|webp));base64,(.+)$/s);
+    if (!match) {
+      const err = new Error('Formato inválido. Solo se aceptan imágenes JPEG, PNG o WebP en base64.');
+      err.status = 400;
+      throw err;
+    }
+
+    const mimeType = match[1];
+    if (!ALLOWED_MIME.has(mimeType)) {
+      const err = new Error('Formato inválido. Solo se aceptan imágenes JPEG, PNG o WebP.');
+      err.status = 400;
+      throw err;
+    }
+
+    // Tamaño aproximado: base64 chars × 0.75 ≈ bytes originales
+    const approxBytes = Math.ceil(match[2].length * 0.75);
+    if (approxBytes > MAX_BYTES) {
+      const err = new Error('La imagen supera el límite de 2 MB.');
+      err.status = 413;
+      throw err;
+    }
+
+    const user = await repository.updateAvatar(userId, avatar);
+    logger.info({ userId }, 'updateAvatar — foto de perfil actualizada');
+    return user;
+  } catch (err) {
+    if (!err.status) logger.error({ err, userId }, 'updateAvatar — error inesperado');
+    throw err;
+  }
+}
+
+export async function clearAvatar(userId) {
+  try {
+    await repository.clearAvatar(userId);
+    logger.info({ userId }, 'clearAvatar — foto de perfil eliminada');
+  } catch (err) {
+    logger.error({ err, userId }, 'clearAvatar — error inesperado');
+    throw err;
+  }
+}

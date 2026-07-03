@@ -9,7 +9,10 @@ export async function getByInstance(req, res, next) {
 }
 
 export async function create(req, res, next) {
-  try { res.status(201).json(await service.create(req.body)); } catch (err) { next(err); }
+  try {
+    res.locals.logSummary = `instance:${req.body.offering_id ?? req.body.instance_id} fecha:${req.body.scheduled_at}`;
+    res.status(201).json(await service.create(req.body));
+  } catch (err) { next(err); }
 }
 
 export async function update(req, res, next) {

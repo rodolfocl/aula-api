@@ -17,7 +17,10 @@ export async function getByInstance(req, res, next) {
 }
 
 export async function create(req, res, next) {
-  try { res.status(201).json(await service.create(req.body)); } catch (err) { next(err); }
+  try {
+    res.locals.logSummary = `student:${req.body.student_id} instance:${req.body.instance_id}`;
+    res.status(201).json(await service.create(req.body));
+  } catch (err) { next(err); }
 }
 
 export async function updateStatus(req, res, next) {

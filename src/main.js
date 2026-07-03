@@ -18,7 +18,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '4mb' }));
 
 // batchMiddleware debe ir ANTES de pinoHttp para que su listener de 'finish'
 // se registre primero y corra antes que el de pinoHttp.

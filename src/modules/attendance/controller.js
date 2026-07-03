@@ -28,6 +28,7 @@ export async function getByEnrollment(req, res, next) {
 export async function create(req, res, next) {
   try {
     const data = { ...req.body, recorded_by: req.user.sub };
+    res.locals.logSummary = `enrollment:${req.body.enrollment_id} session:${req.body.session_id}`;
     res.status(201).json(await service.create(data));
   } catch (err) { next(err); }
 }

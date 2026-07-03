@@ -4,6 +4,7 @@ export async function getAll(req, res, next) {
   try {
     const includeInactive = req.query.includeInactive === 'true';
     const users = await service.getAll({ includeInactive });
+    res.locals.logSummary = `${users.length} usuarios`;
     res.json(users);
   } catch (err) {
     next(err);
@@ -12,8 +13,7 @@ export async function getAll(req, res, next) {
 
 export async function getById(req, res, next) {
   try {
-    const user = await service.getById(req.params.id);
-    res.json(user);
+    res.json(await service.getById(req.params.id));
   } catch (err) {
     next(err);
   }
@@ -22,6 +22,7 @@ export async function getById(req, res, next) {
 export async function update(req, res, next) {
   try {
     const user = await service.update(req.params.id, req.body);
+    res.locals.logSummary = `actualizó: ${Object.keys(req.body).join(', ')}`;
     res.json(user);
   } catch (err) {
     next(err);

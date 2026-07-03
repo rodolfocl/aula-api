@@ -1,62 +1,52 @@
+import logger from '../../config/logger.js';
 import * as repository from './repository.js';
 
 export async function getAll({ year, teacherId, status } = {}) {
   try {
-    console.log('[CourseInstancesService] getAll — filtros:', { year, teacherId, status });
     const instances = await repository.findAll({ year, teacherId, status });
-    console.log('[CourseInstancesService] getAll — instancias encontradas:', instances.length);
     return instances;
   } catch (err) {
-    console.error('[CourseInstancesService] getAll ERROR:', err);
+    logger.error({ err, year, teacherId, status }, 'getAll — error al buscar instancias');
     throw err;
   }
 }
 
 export async function getById(id) {
   try {
-    console.log('[CourseInstancesService] getById — buscando instancia id:', id);
     const instance = await repository.findById(id);
     if (!instance) {
-      console.log('[CourseInstancesService] getById — instancia no encontrada, id:', id);
       const err = new Error('Instancia no encontrada');
       err.status = 404;
       throw err;
     }
-    console.log('[CourseInstancesService] getById — instancia encontrada, id:', instance.id);
     return instance;
   } catch (err) {
-    console.error('[CourseInstancesService] getById ERROR:', err);
+    if (!err.status) logger.error({ err, id }, 'getById — error inesperado');
     throw err;
   }
 }
 
 export async function create(data) {
   try {
-    console.log('[CourseInstancesService] create — creando instancia:', data);
     const sanitized = { ...data };
     if (sanitized.start_date === '') sanitized.start_date = null;
     if (sanitized.end_date === '') sanitized.end_date = null;
-    const instance = await repository.create(sanitized);
-    console.log('[CourseInstancesService] create — instancia creada, id:', instance.id);
-    return instance;
+    return await repository.create(sanitized);
   } catch (err) {
-    console.error('[CourseInstancesService] create ERROR:', err);
+    logger.error({ err }, 'create — error al crear instancia');
     throw err;
   }
 }
 
 export async function update(id, data) {
   try {
-    console.log('[CourseInstancesService] update — actualizando instancia id:', id, '| campos:', Object.keys(data));
     const sanitized = { ...data };
     if (sanitized.start_date === '') sanitized.start_date = null;
     if (sanitized.end_date === '') sanitized.end_date = null;
     await getById(id);
-    const instance = await repository.update(id, sanitized);
-    console.log('[CourseInstancesService] update — instancia actualizada, id:', id);
-    return instance;
+    return await repository.update(id, sanitized);
   } catch (err) {
-    console.error('[CourseInstancesService] update ERROR:', err);
+    if (!err.status) logger.error({ err, id }, 'update — error al actualizar instancia');
     throw err;
   }
 }

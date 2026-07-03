@@ -1,7 +1,11 @@
 import * as service from './service.js';
 
 export async function getByInstance(req, res, next) {
-  try { res.json(await service.getByInstance(req.params.instanceId)); } catch (err) { next(err); }
+  try {
+    const sessions = await service.getByInstance(req.params.instanceId);
+    res.locals.logSummary = `${sessions.length} sesiones`;
+    res.json(sessions);
+  } catch (err) { next(err); }
 }
 
 export async function create(req, res, next) {
@@ -9,5 +13,9 @@ export async function create(req, res, next) {
 }
 
 export async function update(req, res, next) {
-  try { res.json(await service.update(req.params.id, req.body)); } catch (err) { next(err); }
+  try {
+    const session = await service.update(req.params.id, req.body);
+    res.locals.logSummary = `actualizó: ${Object.keys(req.body).join(', ')}`;
+    res.json(session);
+  } catch (err) { next(err); }
 }

@@ -3,6 +3,7 @@ import * as service from './service.js';
 export async function register(req, res, next) {
   try {
     const user = await service.register(req.body);
+    res.locals.logSummary = `registrado: ${user.email}`;
     res.status(201).json(user);
   } catch (err) {
     next(err);

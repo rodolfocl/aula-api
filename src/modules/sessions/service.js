@@ -1,44 +1,35 @@
+import logger from '../../config/logger.js';
 import * as repository from './repository.js';
 
 export async function getByInstance(instanceId) {
   try {
-    console.log('[SessionsService] getByInstance — instanceId:', instanceId);
-    const sessions = await repository.findByInstance(instanceId);
-    console.log('[SessionsService] getByInstance — sesiones encontradas:', sessions.length);
-    return sessions;
+    return await repository.findByInstance(instanceId);
   } catch (err) {
-    console.error('[SessionsService] getByInstance ERROR:', err);
+    logger.error({ err, instanceId }, 'getByInstance — error al buscar sesiones');
     throw err;
   }
 }
 
 export async function create(data) {
   try {
-    console.log('[SessionsService] create — creando sesión:', data);
-    const session = await repository.create(data);
-    console.log('[SessionsService] create — sesión creada, id:', session.id);
-    return session;
+    return await repository.create(data);
   } catch (err) {
-    console.error('[SessionsService] create ERROR:', err);
+    logger.error({ err }, 'create — error al crear sesión');
     throw err;
   }
 }
 
 export async function update(id, data) {
   try {
-    console.log('[SessionsService] update — actualizando sesión id:', id, '| campos:', Object.keys(data));
     const session = await repository.findById(id);
     if (!session) {
-      console.log('[SessionsService] update — sesión no encontrada, id:', id);
       const err = new Error('Sesión no encontrada');
       err.status = 404;
       throw err;
     }
-    const result = await repository.update(id, data);
-    console.log('[SessionsService] update — sesión actualizada, id:', id);
-    return result;
+    return await repository.update(id, data);
   } catch (err) {
-    console.error('[SessionsService] update ERROR:', err);
+    if (!err.status) logger.error({ err, id }, 'update — error al actualizar sesión');
     throw err;
   }
 }

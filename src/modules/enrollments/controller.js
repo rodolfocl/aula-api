@@ -1,11 +1,19 @@
 import * as service from './service.js';
 
 export async function getByStudent(req, res, next) {
-  try { res.json(await service.getByStudent(req.params.studentId)); } catch (err) { next(err); }
+  try {
+    const enrollments = await service.getByStudent(req.params.studentId);
+    res.locals.logSummary = `${enrollments.length} inscripciones`;
+    res.json(enrollments);
+  } catch (err) { next(err); }
 }
 
 export async function getByInstance(req, res, next) {
-  try { res.json(await service.getByInstance(req.params.instanceId)); } catch (err) { next(err); }
+  try {
+    const enrollments = await service.getByInstance(req.params.instanceId);
+    res.locals.logSummary = `${enrollments.length} inscripciones`;
+    res.json(enrollments);
+  } catch (err) { next(err); }
 }
 
 export async function create(req, res, next) {
@@ -14,6 +22,8 @@ export async function create(req, res, next) {
 
 export async function updateStatus(req, res, next) {
   try {
-    res.json(await service.updateStatus(req.params.id, req.body.status));
+    const result = await service.updateStatus(req.params.id, req.body.status);
+    res.locals.logSummary = `status → ${req.body.status}`;
+    res.json(result);
   } catch (err) { next(err); }
 }

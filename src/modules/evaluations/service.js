@@ -1,17 +1,14 @@
 import * as repository from './repository.js';
 
 export async function getByCourseInstance(courseInstanceId) {
-  console.log('[EvaluationsService] getByCourseInstance — instanceId:', courseInstanceId);
   return repository.findByCourseInstance(courseInstanceId);
 }
 
 export async function create(courseInstanceId, data) {
-  console.log('[EvaluationsService] create — instanceId:', courseInstanceId, '| nombre:', data.name);
   return repository.create({ ...data, course_instance_id: courseInstanceId });
 }
 
 export async function update(id, data) {
-  console.log('[EvaluationsService] update — id:', id);
   const evaluation = await repository.findById(id);
   if (!evaluation) {
     const err = new Error('Evaluación no encontrada');
@@ -22,7 +19,6 @@ export async function update(id, data) {
 }
 
 export async function remove(id) {
-  console.log('[EvaluationsService] remove — id:', id);
   const evaluation = await repository.findById(id);
   if (!evaluation) {
     const err = new Error('Evaluación no encontrada');
@@ -39,12 +35,10 @@ export async function remove(id) {
 }
 
 export async function getGradesTable(courseInstanceId) {
-  console.log('[EvaluationsService] getGradesTable — instanceId:', courseInstanceId)
-  return repository.findGradesTable(courseInstanceId)
+  return repository.findGradesTable(courseInstanceId);
 }
 
 export async function getGrades(evaluationId) {
-  console.log('[EvaluationsService] getGrades — evaluationId:', evaluationId);
   const evaluation = await repository.findById(evaluationId);
   if (!evaluation) {
     const err = new Error('Evaluación no encontrada');
@@ -55,7 +49,6 @@ export async function getGrades(evaluationId) {
 }
 
 export async function saveGrades(evaluationId, grades) {
-  console.log('[EvaluationsService] saveGrades — evaluationId:', evaluationId, '| cantidad:', grades?.length);
   if (!Array.isArray(grades) || grades.length === 0) {
     const err = new Error('Se requiere al menos una nota para guardar');
     err.status = 422;

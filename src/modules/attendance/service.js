@@ -1,69 +1,55 @@
+import logger from '../../config/logger.js';
 import * as repository from './repository.js';
 
 export async function getAttendanceTable(instanceId) {
   try {
-    console.log('[AttendanceService] getAttendanceTable — instanceId:', instanceId);
-    const table = await repository.findTableByInstance(instanceId);
-    console.log('[AttendanceService] getAttendanceTable — sesiones:', table.sesiones.length, '| filas:', table.filas.length);
-    return table;
+    return await repository.findTableByInstance(instanceId);
   } catch (err) {
-    console.error('[AttendanceService] getAttendanceTable ERROR:', err);
+    logger.error({ err, instanceId }, 'getAttendanceTable — error al obtener tabla');
     throw err;
   }
 }
 
 export async function upsertBulk(registros) {
   try {
-    console.log('[AttendanceService] upsertBulk — registros:', registros.length);
-    const result = await repository.upsertBulk(registros);
-    console.log('[AttendanceService] upsertBulk — guardados:', result.length);
-    return result;
+    return await repository.upsertBulk(registros);
   } catch (err) {
-    console.error('[AttendanceService] upsertBulk ERROR:', err);
+    logger.error({ err, count: registros?.length }, 'upsertBulk — error al guardar registros');
     throw err;
   }
 }
 
 export async function getByEnrollment(enrollmentId) {
   try {
-    console.log('[AttendanceService] getByEnrollment — enrollmentId:', enrollmentId);
     const records = await repository.findByEnrollment(enrollmentId);
     const absences = records.filter(r => r.status === 'absent').length;
-    console.log('[AttendanceService] getByEnrollment — registros:', records.length, '| ausencias:', absences);
     return { records, absences };
   } catch (err) {
-    console.error('[AttendanceService] getByEnrollment ERROR:', err);
+    logger.error({ err, enrollmentId }, 'getByEnrollment — error al buscar registros');
     throw err;
   }
 }
 
 export async function create(data) {
   try {
-    console.log('[AttendanceService] create — registrando asistencia:', data);
-    const record = await repository.create(data);
-    console.log('[AttendanceService] create — asistencia registrada, id:', record.id);
-    return record;
+    return await repository.create(data);
   } catch (err) {
-    console.error('[AttendanceService] create ERROR:', err);
+    logger.error({ err }, 'create — error al registrar asistencia');
     throw err;
   }
 }
 
 export async function update(id, data) {
   try {
-    console.log('[AttendanceService] update — actualizando registro id:', id, '| campos:', Object.keys(data));
     const record = await repository.findById(id);
     if (!record) {
-      console.log('[AttendanceService] update — registro no encontrado, id:', id);
       const err = new Error('Registro de asistencia no encontrado');
       err.status = 404;
       throw err;
     }
-    const result = await repository.update(id, data);
-    console.log('[AttendanceService] update — registro actualizado, id:', id);
-    return result;
+    return await repository.update(id, data);
   } catch (err) {
-    console.error('[AttendanceService] update ERROR:', err);
+    if (!err.status) logger.error({ err, id }, 'update — error al actualizar registro');
     throw err;
   }
 }

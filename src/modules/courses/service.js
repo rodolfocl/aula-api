@@ -27,9 +27,10 @@ export async function getById(id) {
 }
 
 const DAYS_OF_WEEK = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+const ALLOWED_FIELDS = ['template_id', 'teacher_id', 'year', 'period', 'start_date', 'end_date', 'max_absences', 'status', 'close_reason', 'is_historical', 'day_of_week', 'schedule_time'];
 
 function sanitize(data) {
-  const s = { ...data };
+  const s = Object.fromEntries(ALLOWED_FIELDS.filter(k => k in data).map(k => [k, data[k]]));
   if (s.start_date === '') s.start_date = null;
   if (s.end_date === '') s.end_date = null;
   if (s.schedule_time === '') s.schedule_time = null;

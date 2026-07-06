@@ -15,7 +15,7 @@ export async function getById(req, res, next) {
 
 export async function create(req, res, next) {
   try {
-    res.locals.logSummary = `course:${req.body.course_id} year:${req.body.year}`;
+    res.locals.logSummary = `template:${req.body.template_id} year:${req.body.year}`;
     res.status(201).json(await service.create(req.body));
   } catch (err) { next(err); }
 }

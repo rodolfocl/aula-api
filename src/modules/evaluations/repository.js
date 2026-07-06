@@ -2,7 +2,7 @@ import db from '../../db/db.js';
 
 export async function findByCourseInstance(courseInstanceId) {
   return db('evaluations')
-    .where({ course_instance_id: courseInstanceId })
+    .where({ course_id: courseInstanceId })
     .orderBy([{ column: 'date', order: 'asc', nulls: 'last' }, { column: 'created_at', order: 'asc' }]);
 }
 
@@ -44,17 +44,17 @@ export async function findGradesByEvaluation(evaluationId) {
 export async function findGradesTable(courseInstanceId) {
   const [evaluaciones, rows] = await Promise.all([
     db('evaluations')
-      .where({ course_instance_id: courseInstanceId })
+      .where({ course_id: courseInstanceId })
       .select('id', 'name', 'date')
       .orderBy([{ column: 'date', order: 'asc', nulls: 'last' }, { column: 'created_at', order: 'asc' }]),
 
     db('enrollments as e')
       .join('users as u', 'e.student_id', 'u.id')
-      .leftJoin('evaluations as ev', 'ev.course_instance_id', 'e.instance_id')
+      .leftJoin('evaluations as ev', 'ev.course_id', 'e.course_id')
       .leftJoin('grades as g', function () {
         this.on('g.enrollment_id', '=', 'e.id').andOn('g.evaluation_id', '=', 'ev.id')
       })
-      .where('e.instance_id', courseInstanceId)
+      .where('e.course_id', courseInstanceId)
       .select('e.id as enrollment_id', 'u.full_name', 'ev.id as evaluation_id', 'g.grade')
       .orderBy('u.full_name'),
   ])

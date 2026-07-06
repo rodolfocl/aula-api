@@ -7,8 +7,8 @@ import { errorHandler } from './middlewares/error.handler.js';
 import { batchMiddleware } from './middlewares/batch-logger.js';
 import authRoutes from './modules/auth/routes.js';
 import usersRoutes from './modules/users/routes.js';
+import courseTemplatesRoutes from './modules/course_templates/routes.js';
 import coursesRoutes from './modules/courses/routes.js';
-import courseInstancesRoutes from './modules/course_instances/routes.js';
 import enrollmentsRoutes from './modules/enrollments/routes.js';
 import sessionsRoutes from './modules/sessions/routes.js';
 import attendanceRoutes from './modules/attendance/routes.js';
@@ -58,8 +58,8 @@ app.use(
 
 app.use('/auth', authRoutes);
 app.use('/users', usersRoutes);
+app.use('/course-templates', courseTemplatesRoutes);
 app.use('/courses', coursesRoutes);
-app.use('/course-instances', courseInstancesRoutes);
 app.use('/enrollments', enrollmentsRoutes);
 app.use('/sessions', sessionsRoutes);
 app.use('/attendance', attendanceRoutes);

@@ -5,7 +5,7 @@ export async function getByCourseInstance(courseInstanceId) {
 }
 
 export async function create(courseInstanceId, data) {
-  return repository.create({ ...data, course_instance_id: courseInstanceId });
+  return repository.create({ ...data, course_id: courseInstanceId });
 }
 
 export async function update(id, data) {

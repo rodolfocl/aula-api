@@ -25,17 +25,17 @@ export async function update(id, data) {
 export async function findTableByInstance(instanceId) {
   const [sesiones, rows] = await Promise.all([
     db('sessions')
-      .where({ offering_id: instanceId })
+      .where({ course_id: instanceId })
       .select('id', 'scheduled_at', 'title')
       .orderBy('scheduled_at'),
 
     db('enrollments as e')
       .join('users as u', 'e.student_id', 'u.id')
-      .leftJoin('sessions as s', 's.offering_id', 'e.instance_id')
+      .leftJoin('sessions as s', 's.course_id', 'e.course_id')
       .leftJoin('attendance as a', function () {
         this.on('a.enrollment_id', '=', 'e.id').andOn('a.session_id', '=', 's.id')
       })
-      .where('e.instance_id', instanceId)
+      .where('e.course_id', instanceId)
       .select('e.id as enrollment_id', 'u.full_name', 's.id as session_id', 'a.status')
       .orderBy(['u.full_name', 's.scheduled_at']),
   ])

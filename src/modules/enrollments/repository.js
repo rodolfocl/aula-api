@@ -2,8 +2,8 @@ import db from '../../db/db.js';
 
 export async function findByStudent(studentId) {
   return db('enrollments as e')
-    .join('course_instances as ci', 'e.instance_id', 'ci.id')
-    .join('courses as c', 'ci.course_id', 'c.id')
+    .join('courses as ci', 'e.course_id', 'ci.id')
+    .join('course_templates as c', 'ci.template_id', 'c.id')
     .where('e.student_id', studentId)
     .select(
       'e.id',
@@ -22,7 +22,7 @@ export async function findByInstance(instanceId) {
   return db('enrollments as e')
     .join('users as u', 'e.student_id', 'u.id')
     .leftJoin('attendance as a', 'a.enrollment_id', 'e.id')
-    .where('e.instance_id', instanceId)
+    .where('e.course_id', instanceId)
     .groupBy('e.id', 'e.student_id', 'e.status', 'u.full_name', 'u.id')
     .select(
       'e.id',

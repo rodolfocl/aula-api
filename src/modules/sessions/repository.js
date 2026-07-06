@@ -2,7 +2,7 @@ import db from '../../db/db.js';
 
 export async function findByInstance(instanceId) {
   return db('sessions')
-    .where({ offering_id: instanceId })
+    .where({ course_id: instanceId })
     .select('*')
     .orderBy('scheduled_at');
 }

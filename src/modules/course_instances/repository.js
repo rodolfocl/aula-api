@@ -1,6 +1,6 @@
 import db from '../../db/db.js';
 
-export async function findAll({ year, teacherId, status } = {}) {
+export async function findAll({ year, teacherId, status, courseId } = {}) {
   const query = db('course_instances as ci')
     .join('courses as c', 'ci.course_id', 'c.id')
     .join('users as u', 'ci.teacher_id', 'u.id')
@@ -14,6 +14,7 @@ export async function findAll({ year, teacherId, status } = {}) {
   if (year)      query.where('ci.year', year);
   if (teacherId) query.where('ci.teacher_id', teacherId);
   if (status)    query.where('ci.status', status);
+  if (courseId)  query.where('ci.course_id', courseId);
   return query;
 }
 

@@ -1,8 +1,22 @@
 import db from '../../db/db.js';
 
 export async function findAll({ includeInactive = false } = {}) {
-  const query = db('courses').select('*').orderBy('name');
-  if (!includeInactive) query.where({ active: true });
+  const query = db('courses as c')
+    .select(
+      'c.*',
+      db.raw(
+        `(SELECT COUNT(*)::int FROM course_instances ci
+          WHERE ci.course_id = c.id AND ci.status = 'active')
+         AS active_instances_count`
+      ),
+      db.raw(
+        `(SELECT COUNT(*)::int FROM course_instances ci
+          WHERE ci.course_id = c.id AND ci.status <> 'active')
+         AS past_instances_count`
+      )
+    )
+    .orderBy('c.name');
+  if (!includeInactive) query.where({ 'c.active': true });
   return query;
 }
 

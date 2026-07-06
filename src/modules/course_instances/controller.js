@@ -2,8 +2,8 @@ import * as service from './service.js';
 
 export async function getAll(req, res, next) {
   try {
-    const { year, teacher_id: teacherId, status } = req.query;
-    const instances = await service.getAll({ year, teacherId, status });
+    const { year, teacher_id: teacherId, status, course_id: courseId } = req.query;
+    const instances = await service.getAll({ year, teacherId, status, courseId });
     res.locals.logSummary = `${instances.length} instancias`;
     res.json(instances);
   } catch (err) { next(err); }

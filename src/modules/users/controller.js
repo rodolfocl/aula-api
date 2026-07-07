@@ -38,6 +38,17 @@ export async function remove(req, res, next) {
   }
 }
 
+export async function updateMe(req, res, next) {
+  try {
+    const userId = req.user.sub;
+    const user = await service.updateMe(userId, req.body);
+    res.locals.logSummary = `usuario:${userId} actualizó su perfil: ${Object.keys(req.body).join(', ')}`;
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function updateAvatar(req, res, next) {
   try {
     const userId = req.user.sub;

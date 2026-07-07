@@ -13,6 +13,7 @@ import enrollmentsRoutes from './modules/enrollments/routes.js';
 import sessionsRoutes from './modules/sessions/routes.js';
 import attendanceRoutes from './modules/attendance/routes.js';
 import evaluationsRoutes from './modules/evaluations/routes.js';
+import dashboardRoutes from './modules/dashboard/routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -64,6 +65,7 @@ app.use('/enrollments', enrollmentsRoutes);
 app.use('/sessions', sessionsRoutes);
 app.use('/attendance', attendanceRoutes);
 app.use('/evaluations', evaluationsRoutes);
+app.use('/dashboard', dashboardRoutes);
 
 app.use(errorHandler);
 

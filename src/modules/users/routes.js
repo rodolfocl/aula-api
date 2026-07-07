@@ -4,6 +4,7 @@ import * as controller from './controller.js';
 
 const router = Router();
 
+router.patch('/me', authMiddleware, controller.updateMe);
 router.patch('/me/avatar', authMiddleware, controller.updateAvatar);
 router.delete('/me/avatar', authMiddleware, controller.clearAvatar);
 router.get('/', controller.getAll);

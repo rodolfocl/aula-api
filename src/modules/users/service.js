@@ -34,6 +34,40 @@ export async function update(id, data) {
   }
 }
 
+export async function updateMe(id, data) {
+  try {
+    const allowed = {};
+
+    if ('full_name' in data) {
+      const name = typeof data.full_name === 'string' ? data.full_name.trim() : '';
+      if (!name) {
+        const err = new Error('El nombre no puede estar vacío.');
+        err.status = 400;
+        throw err;
+      }
+      if (name.length > 100) {
+        const err = new Error('El nombre no puede superar los 100 caracteres.');
+        err.status = 400;
+        throw err;
+      }
+      allowed.full_name = name;
+    }
+
+    if (!Object.keys(allowed).length) {
+      const err = new Error('No hay campos válidos para actualizar.');
+      err.status = 400;
+      throw err;
+    }
+
+    const user = await repository.update(id, allowed);
+    logger.info({ userId: id, fields: Object.keys(allowed) }, 'updateMe — perfil actualizado');
+    return user;
+  } catch (err) {
+    if (!err.status) logger.error({ err, id }, 'updateMe — error inesperado');
+    throw err;
+  }
+}
+
 export async function remove(id) {
   try {
     return await repository.remove(id);

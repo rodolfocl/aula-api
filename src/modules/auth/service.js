@@ -63,9 +63,10 @@ export async function forgotPassword({ email }) {
       await repository.setResetToken(email, hashedToken, expiresAt);
 
       const resend = new Resend(process.env.RESEND_API_KEY);
+      const recipient = process.env.NODE_ENV === 'production' ? email : (process.env.RESEND_TEST_EMAIL ?? email);
       const { error } = await resend.emails.send({
         from: 'onboarding@resend.dev',
-        to: email,
+        to: recipient,
         subject: 'Recuperar contraseña — Aula PDV',
         html: `<p>Haz clic aquí para restablecer tu contraseña: <a href="${process.env.FRONTEND_URL}/reset-password?token=${rawToken}">Restablecer contraseña</a></p>`,
       });

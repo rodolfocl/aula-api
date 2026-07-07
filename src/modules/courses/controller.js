@@ -1,8 +1,11 @@
 import * as service from './service.js';
+import { getUserRoles } from '../../utils/courseAuth.js';
 
 export async function getAll(req, res, next) {
   try {
-    const { year, teacher_id: teacherId, status, course_id: courseId } = req.query;
+    const { year, status, course_id: courseId } = req.query;
+    const roles = await getUserRoles(req.user.sub);
+    const teacherId = roles.includes('administrador') ? undefined : req.user.sub;
     const instances = await service.getAll({ year, teacherId, status, courseId });
     res.locals.logSummary = `${instances.length} instancias`;
     res.json(instances);

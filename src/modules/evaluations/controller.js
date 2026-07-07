@@ -1,4 +1,8 @@
 import * as service from './service.js';
+import {
+  assertOwnerOrAdmin,
+  getCourseInstanceIdFromEvaluation,
+} from '../../utils/courseAuth.js';
 
 export async function getByCourseInstance(req, res, next) {
   try {
@@ -10,6 +14,7 @@ export async function getByCourseInstance(req, res, next) {
 
 export async function create(req, res, next) {
   try {
+    await assertOwnerOrAdmin(req, req.params.id);
     const evaluation = await service.create(req.params.id, req.body);
     res.locals.logSummary = `creada: ${req.body.name}`;
     res.status(201).json(evaluation);
@@ -18,6 +23,8 @@ export async function create(req, res, next) {
 
 export async function update(req, res, next) {
   try {
+    const courseInstanceId = await getCourseInstanceIdFromEvaluation(req.params.id);
+    if (courseInstanceId != null) await assertOwnerOrAdmin(req, courseInstanceId);
     const evaluation = await service.update(req.params.id, req.body);
     res.locals.logSummary = `actualizó: ${Object.keys(req.body).join(', ')}`;
     res.json(evaluation);
@@ -26,6 +33,8 @@ export async function update(req, res, next) {
 
 export async function remove(req, res, next) {
   try {
+    const courseInstanceId = await getCourseInstanceIdFromEvaluation(req.params.id);
+    if (courseInstanceId != null) await assertOwnerOrAdmin(req, courseInstanceId);
     await service.remove(req.params.id);
     res.status(204).end();
   } catch (err) { next(err); }
@@ -45,6 +54,8 @@ export async function getGrades(req, res, next) {
 
 export async function saveGrades(req, res, next) {
   try {
+    const courseInstanceId = await getCourseInstanceIdFromEvaluation(req.params.id);
+    if (courseInstanceId != null) await assertOwnerOrAdmin(req, courseInstanceId);
     const result = await service.saveGrades(req.params.id, req.body.grades);
     res.locals.logSummary = `${req.body.grades?.length ?? 0} notas guardadas`;
     res.json(result);

@@ -1,5 +1,5 @@
 import * as service from './service.js';
-import { getUserRoles } from '../../utils/courseAuth.js';
+import { getUserRoles, assertOwnerOrAdmin, assertCourseIsActive } from '../../utils/courseAuth.js';
 
 export async function getAll(req, res, next) {
   try {
@@ -25,6 +25,8 @@ export async function create(req, res, next) {
 
 export async function update(req, res, next) {
   try {
+    await assertOwnerOrAdmin(req, req.params.id);
+    await assertCourseIsActive(req.params.id);
     const instance = await service.update(req.params.id, req.body);
     res.locals.logSummary = `actualizó: ${Object.keys(req.body).join(', ')}`;
     res.json(instance);

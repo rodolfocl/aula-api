@@ -1,5 +1,14 @@
 import db from '../db/db.js';
 
+export async function assertCourseIsActive(courseInstanceId) {
+  const instance = await db('courses').where({ id: courseInstanceId }).select('status').first();
+  if (!instance || instance.status !== 'active') {
+    const err = new Error('No se puede modificar un curso que no está activo');
+    err.status = 409;
+    throw err;
+  }
+}
+
 export async function getUserRoles(userId) {
   const user = await db('users').where({ id: userId }).select('roles').first();
   return user?.roles ?? [];

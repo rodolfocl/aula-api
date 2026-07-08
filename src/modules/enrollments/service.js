@@ -23,9 +23,33 @@ export async function getByInstance(instanceId) {
 
 export async function create(data) {
   try {
+    const existing = await repository.findByStudentAndCourse(data.student_id, data.course_id);
+    if (existing) {
+      if (existing.status === 'withdrawn') {
+        return await repository.updateStatus(existing.id, 'in_progress');
+      }
+      const err = new Error('El alumno ya está inscrito en este curso');
+      err.status = 409;
+      throw err;
+    }
     return await repository.create(data);
   } catch (err) {
-    logger.error({ err }, 'create — error al crear inscripción');
+    if (!err.status) logger.error({ err }, 'create — error al crear inscripción');
+    throw err;
+  }
+}
+
+export async function remove(id) {
+  try {
+    const enrollment = await repository.findById(id);
+    if (!enrollment) {
+      const err = new Error('Inscripción no encontrada');
+      err.status = 404;
+      throw err;
+    }
+    return await repository.remove(id);
+  } catch (err) {
+    if (!err.status) logger.error({ err, id }, 'remove — error inesperado');
     throw err;
   }
 }

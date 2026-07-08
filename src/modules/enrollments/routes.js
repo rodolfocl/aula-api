@@ -10,5 +10,6 @@ router.get('/student/:studentId', controller.getByStudent);
 router.get('/instance/:instanceId', controller.getByInstance);
 router.post('/', controller.create);
 router.patch('/:id/status', controller.updateStatus);
+router.delete('/:id', controller.remove);
 
 export default router;

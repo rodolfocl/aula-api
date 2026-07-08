@@ -30,3 +30,11 @@ export async function updateStatus(req, res, next) {
     res.json(result);
   } catch (err) { next(err); }
 }
+
+export async function remove(req, res, next) {
+  try {
+    const result = await service.remove(req.params.id);
+    res.locals.logSummary = `enrollment:${req.params.id} → withdrawn`;
+    res.json(result);
+  } catch (err) { next(err); }
+}

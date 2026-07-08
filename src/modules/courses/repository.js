@@ -8,6 +8,7 @@ export async function findAll({ year, teacherId, status, courseId } = {}) {
       'ci.*',
       'c.name as course_name',
       'u.full_name as teacher_name',
+      db.raw(`(SELECT COUNT(*) FROM enrollments e WHERE e.course_id = ci.id AND e.status <> 'withdrawn') AS student_count`),
     )
     .orderBy('ci.year', 'desc');
 

@@ -38,6 +38,18 @@ export async function findById(id) {
   return db('enrollments').where({ id }).first();
 }
 
+export async function findByStudentAndCourse(studentId, courseId) {
+  return db('enrollments').where({ student_id: studentId, course_id: courseId }).first();
+}
+
+export async function remove(id) {
+  const [enrollment] = await db('enrollments')
+    .where({ id })
+    .update({ status: 'withdrawn', updated_at: new Date() })
+    .returning('*');
+  return enrollment;
+}
+
 export async function create(data) {
   const [enrollment] = await db('enrollments').insert(data).returning('*');
   return enrollment;

@@ -1,6 +1,7 @@
 import * as service from './service.js';
 import {
   assertOwnerOrAdmin,
+  assertCourseIsActive,
   getCourseInstanceIdFromSession,
   getCourseInstanceIdFromAttendance,
 } from '../../utils/courseAuth.js';
@@ -18,7 +19,10 @@ export async function upsertBulk(req, res, next) {
     const registros = req.body.registros ?? [];
     if (registros.length > 0) {
       const courseInstanceId = await getCourseInstanceIdFromSession(registros[0].session_id);
-      if (courseInstanceId != null) await assertOwnerOrAdmin(req, courseInstanceId);
+      if (courseInstanceId != null) {
+        await assertOwnerOrAdmin(req, courseInstanceId);
+        await assertCourseIsActive(courseInstanceId);
+      }
     }
     const result = await service.upsertBulk(registros);
     res.locals.logSummary = `${registros.length} registros guardados`;
@@ -37,7 +41,10 @@ export async function getByEnrollment(req, res, next) {
 export async function create(req, res, next) {
   try {
     const courseInstanceId = await getCourseInstanceIdFromSession(req.body.session_id);
-    if (courseInstanceId != null) await assertOwnerOrAdmin(req, courseInstanceId);
+    if (courseInstanceId != null) {
+      await assertOwnerOrAdmin(req, courseInstanceId);
+      await assertCourseIsActive(courseInstanceId);
+    }
     const data = { ...req.body, recorded_by: req.user.sub };
     res.locals.logSummary = `enrollment:${req.body.enrollment_id} session:${req.body.session_id}`;
     res.status(201).json(await service.create(data));
@@ -47,7 +54,10 @@ export async function create(req, res, next) {
 export async function update(req, res, next) {
   try {
     const courseInstanceId = await getCourseInstanceIdFromAttendance(req.params.id);
-    if (courseInstanceId != null) await assertOwnerOrAdmin(req, courseInstanceId);
+    if (courseInstanceId != null) {
+      await assertOwnerOrAdmin(req, courseInstanceId);
+      await assertCourseIsActive(courseInstanceId);
+    }
     const result = await service.update(req.params.id, req.body);
     res.locals.logSummary = `actualizó: ${Object.keys(req.body).join(', ')}`;
     res.json(result);

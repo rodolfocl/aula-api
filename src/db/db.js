@@ -5,4 +5,4 @@ const db = knex({
   connection: process.env.DATABASE_URL,
 });
 
-export default db;
+export default db

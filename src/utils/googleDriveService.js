@@ -106,6 +106,43 @@ export async function trashItem(itemId) {
   });
 }
 
+export async function getItemInfo(itemId) {
+  const drive = await getDriveClient();
+  const res = await drive.files.get({
+    fileId: itemId,
+    fields: 'id, name, mimeType, parents',
+  });
+  return res.data;
+}
+
+export async function moveItem(itemId, newParentId, oldParentId) {
+  const drive = await getDriveClient();
+  const res = await drive.files.update({
+    fileId: itemId,
+    addParents: newParentId,
+    removeParents: oldParentId,
+    fields: 'id, name, mimeType, size, modifiedTime, webViewLink, parents',
+  });
+  return res.data;
+}
+
+// Devuelve true si ancestorId es un ancestro de targetId (targetId está dentro de ancestorId)
+export async function isFolderAncestorOf(ancestorId, targetId) {
+  const drive = await getDriveClient();
+  let currentId = targetId;
+  const visited = new Set();
+  while (currentId) {
+    if (visited.has(currentId)) break;
+    visited.add(currentId);
+    if (currentId === ancestorId) return true;
+    try {
+      const res = await drive.files.get({ fileId: currentId, fields: 'parents' });
+      currentId = res.data.parents?.[0] ?? null;
+    } catch { break; }
+  }
+  return false;
+}
+
 // Recorre parents hacia arriba hasta rootFolderId y devuelve el breadcrumb [{id, name}].
 export async function getItemPath(itemId, rootFolderId) {
   if (!itemId || itemId === rootFolderId) return [];

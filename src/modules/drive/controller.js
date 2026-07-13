@@ -56,3 +56,13 @@ export async function deleteItem(req, res, next) {
     res.json({ message: 'Elemento eliminado' });
   } catch (err) { next(err); }
 }
+
+export async function moveItem(req, res, next) {
+  try {
+    const { newParentId } = req.body;
+    if (!newParentId) return res.status(400).json({ error: 'newParentId requerido' });
+    const item = await service.moveItem(req.params.itemId, newParentId);
+    res.locals.logSummary = `movido: ${req.params.itemId} → ${newParentId}`;
+    res.json(item);
+  } catch (err) { next(err); }
+}

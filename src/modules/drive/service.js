@@ -39,3 +39,29 @@ export async function renameItem(itemId, name) {
 export async function deleteItem(itemId) {
   return driveLib.trashItem(itemId);
 }
+
+export async function moveItem(itemId, newParentId) {
+  const resolvedNewParent = resolveFolder(newParentId);
+  const item = await driveLib.getItemInfo(itemId);
+  const oldParentId = item.parents?.[0];
+
+  if (oldParentId === resolvedNewParent) {
+    return item;
+  }
+
+  if (item.mimeType === 'application/vnd.google-apps.folder') {
+    if (itemId === resolvedNewParent) {
+      const err = new Error('No se puede mover una carpeta dentro de sí misma.');
+      err.status = 400;
+      throw err;
+    }
+    const wouldCycle = await driveLib.isFolderAncestorOf(itemId, resolvedNewParent);
+    if (wouldCycle) {
+      const err = new Error('No se puede mover una carpeta dentro de una de sus subcarpetas.');
+      err.status = 400;
+      throw err;
+    }
+  }
+
+  return driveLib.moveItem(itemId, resolvedNewParent, oldParentId);
+}

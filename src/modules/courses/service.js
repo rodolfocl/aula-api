@@ -3,6 +3,7 @@ import * as repository from './repository.js';
 import * as sessionsRepo from '../sessions/repository.js';
 import db from '../../db/db.js';
 import { createMeetEvent, updateMeetEvent } from '../../utils/googleCalendarService.js';
+import { createFolder } from '../../utils/googleDriveService.js';
 
 export async function getAll({ year, teacherId, status, courseId } = {}) {
   try {
@@ -159,15 +160,28 @@ async function syncMeetEvent(instance) {
   }
 }
 
+async function syncDriveFolder(instance) {
+  try {
+    const rootFolderId = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID || null;
+    const folderName = `${instance.course_name} [${instance.id}]`;
+    const folder = await createFolder(folderName, rootFolderId);
+    await repository.update(instance.id, { drive_folder_id: folder.id });
+    logger.info({ instanceId: instance.id, folderId: folder.id }, 'syncDriveFolder — carpeta creada');
+  } catch (err) {
+    logger.error({ err, instanceId: instance.id }, 'syncDriveFolder — error al crear carpeta (no bloqueante)');
+  }
+}
+
 export async function create(data) {
   try {
     const instance = await repository.create(sanitize(data));
+    const full = await repository.findById(instance.id);
 
     if (hasScheduleData(instance)) {
-      // Resolvemos el nombre del curso para el summary del evento
-      const full = await repository.findById(instance.id);
       syncMeetEvent(full).catch(() => {});
     }
+
+    syncDriveFolder(full).catch(() => {});
 
     return instance;
   } catch (err) {

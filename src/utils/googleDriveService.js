@@ -78,7 +78,7 @@ export async function listChildren(folderId) {
   const drive = await getDriveClient();
   const res = await drive.files.list({
     q: `'${folderId}' in parents and trashed = false`,
-    fields: 'files(id, name, mimeType, size, modifiedTime, webViewLink, thumbnailLink)',
+    fields: 'files(id, name, mimeType, size, modifiedTime, webViewLink, thumbnailLink, starred)',
     orderBy: 'folder,name',
     pageSize: 500,
   });
@@ -86,6 +86,16 @@ export async function listChildren(folderId) {
   const folders = all.filter(f => f.mimeType === 'application/vnd.google-apps.folder');
   const files   = all.filter(f => f.mimeType !== 'application/vnd.google-apps.folder');
   return { folders, files };
+}
+
+export async function toggleStar(itemId, starred) {
+  const drive = await getDriveClient();
+  const res = await drive.files.update({
+    fileId: itemId,
+    requestBody: { starred },
+    fields: 'id, name, mimeType, size, modifiedTime, webViewLink, starred',
+  });
+  return res.data;
 }
 
 export async function renameItem(itemId, newName) {

@@ -66,3 +66,13 @@ export async function moveItem(req, res, next) {
     res.json(item);
   } catch (err) { next(err); }
 }
+
+export async function starItem(req, res, next) {
+  try {
+    const { starred } = req.body;
+    if (typeof starred !== 'boolean') return res.status(400).json({ error: 'starred debe ser boolean' });
+    const item = await service.toggleStar(req.params.itemId, starred);
+    res.locals.logSummary = `${starred ? 'destacado' : 'quitado destacado'}: ${req.params.itemId}`;
+    res.json(item);
+  } catch (err) { next(err); }
+}

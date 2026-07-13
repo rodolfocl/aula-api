@@ -7,13 +7,26 @@ function resolveFolder(folderId) {
   return folderId;
 }
 
+function sortStarredFirst(items) {
+  return items.sort((a, b) => (b.starred ? 1 : 0) - (a.starred ? 1 : 0) || a.name.localeCompare(b.name, 'es'));
+}
+
 export async function browse(folderId) {
   const resolvedId = resolveFolder(folderId);
   const [{ folders, files }, breadcrumb] = await Promise.all([
     driveLib.listChildren(resolvedId),
     driveLib.getItemPath(resolvedId, ROOT_FOLDER_ID),
   ]);
-  return { currentFolderId: resolvedId, breadcrumb, folders, files };
+  return {
+    currentFolderId: resolvedId,
+    breadcrumb,
+    folders: sortStarredFirst(folders),
+    files: sortStarredFirst(files),
+  };
+}
+
+export async function toggleStar(itemId, starred) {
+  return driveLib.toggleStar(itemId, starred);
 }
 
 export async function createFolder(parentId, name) {

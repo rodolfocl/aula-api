@@ -15,6 +15,7 @@ router.post('/folders/:folderId/files', upload.single('file'), controller.upload
 router.get('/files/:fileId/download', controller.downloadFile);
 router.patch('/items/:itemId', controller.renameItem);
 router.patch('/items/:itemId/move', controller.moveItem);
+router.patch('/items/:itemId/star', controller.starItem);
 router.delete('/items/:itemId', controller.deleteItem);
 
 export default router;

@@ -21,7 +21,7 @@ import driveRoutes from './modules/drive/routes.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({ exposedHeaders: ['X-Renewed-Token'] }));
 app.use(express.json({ limit: '4mb' }));
 
 // batchMiddleware debe ir ANTES de pinoHttp para que su listener de 'finish'

@@ -16,6 +16,7 @@ import evaluationsRoutes from './modules/evaluations/routes.js';
 import dashboardRoutes from './modules/dashboard/routes.js';
 import calendarRoutes from './modules/calendar/routes.js';
 import adminRoutes from './modules/admin/routes.js';
+import driveRoutes from './modules/drive/routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -70,6 +71,7 @@ app.use('/evaluations', evaluationsRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/calendar', calendarRoutes);
 app.use('/admin', adminRoutes);
+app.use('/drive', driveRoutes);
 
 app.use(errorHandler);
 

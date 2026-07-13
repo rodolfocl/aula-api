@@ -73,3 +73,55 @@ export async function deleteFile(fileId) {
   const drive = await getDriveClient();
   await drive.files.delete({ fileId });
 }
+
+export async function listChildren(folderId) {
+  const drive = await getDriveClient();
+  const res = await drive.files.list({
+    q: `'${folderId}' in parents and trashed = false`,
+    fields: 'files(id, name, mimeType, size, modifiedTime, webViewLink, thumbnailLink)',
+    orderBy: 'folder,name',
+    pageSize: 500,
+  });
+  const all = res.data.files ?? [];
+  const folders = all.filter(f => f.mimeType === 'application/vnd.google-apps.folder');
+  const files   = all.filter(f => f.mimeType !== 'application/vnd.google-apps.folder');
+  return { folders, files };
+}
+
+export async function renameItem(itemId, newName) {
+  const drive = await getDriveClient();
+  const res = await drive.files.update({
+    fileId: itemId,
+    requestBody: { name: newName },
+    fields: 'id, name',
+  });
+  return res.data;
+}
+
+export async function trashItem(itemId) {
+  const drive = await getDriveClient();
+  await drive.files.update({
+    fileId: itemId,
+    requestBody: { trashed: true },
+  });
+}
+
+// Recorre parents hacia arriba hasta rootFolderId y devuelve el breadcrumb [{id, name}].
+export async function getItemPath(itemId, rootFolderId) {
+  if (!itemId || itemId === rootFolderId) return [];
+  const drive = await getDriveClient();
+  const path = [];
+  let currentId = itemId;
+
+  while (currentId && currentId !== rootFolderId) {
+    const res = await drive.files.get({
+      fileId: currentId,
+      fields: 'id, name, parents',
+    });
+    const item = res.data;
+    path.unshift({ id: item.id, name: item.name });
+    currentId = item.parents?.[0] ?? null;
+  }
+
+  return path;
+}

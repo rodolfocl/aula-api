@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import logger from '../../config/logger.js';
 import * as repository from './repository.js';
-import { Resend } from 'resend';
+import { sendPasswordResetEmail } from '../../utils/email.js';
 
 export async function register({ full_name, email, password, phone, photo_url, roles }) {
   try {
@@ -60,20 +60,10 @@ export async function forgotPassword({ email }) {
       const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-      await repository.setResetToken(email, hashedToken, expiresAt);
+      await repository.setResetToken(user.email, hashedToken, expiresAt);
 
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      const recipient = process.env.NODE_ENV === 'production' ? email : (process.env.RESEND_TEST_EMAIL ?? email);
-      const { error } = await resend.emails.send({
-        from: 'onboarding@resend.dev',
-        to: recipient,
-        subject: 'Recuperar contraseña — Aula PDV',
-        html: `<p>Haz clic aquí para restablecer tu contraseña: <a href="${process.env.FRONTEND_URL}/reset-password?token=${rawToken}">Restablecer contraseña</a></p>`,
-      });
-
-      if (error) {
-        throw new Error(`Resend error: ${JSON.stringify(error)}`);
-      }
+      const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
+      await sendPasswordResetEmail(user.email, user.full_name, resetLink);
     }
 
     return { message: 'Si el email existe, recibirás un link de recuperación en tu bandeja.' };

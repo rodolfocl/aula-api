@@ -9,6 +9,7 @@
   "scripts": {
     "start:dev": "nodemon src/main.js",
     "start": "node src/main.js",
+    "test": "node --experimental-test-module-mocks --test src/**/*.test.js",
     "migrate": "knex migrate:latest",
     "migrate:rollback": "knex migrate:rollback"
   },

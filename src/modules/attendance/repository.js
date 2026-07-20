@@ -36,6 +36,7 @@ export async function findTableByInstance(instanceId) {
         this.on('a.enrollment_id', '=', 'e.id').andOn('a.session_id', '=', 's.id')
       })
       .where('e.course_id', instanceId)
+      .whereNot('e.status', 'withdrawn')
       .select('e.id as enrollment_id', 'u.full_name', 's.id as session_id', 'a.status')
       .orderBy(['u.full_name', 's.scheduled_at']),
   ])

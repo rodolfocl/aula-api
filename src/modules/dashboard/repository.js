@@ -89,19 +89,26 @@ export async function getAlerts() {
     `),
     db.raw(`
       SELECT
-        u.full_name AS student_name,
-        ct.name AS course_name,
-        ROUND(AVG(g.grade)::numeric, 2) AS avg_grade
-      FROM grades g
-      JOIN enrollments e ON g.enrollment_id = e.id
-      JOIN evaluations ev ON g.evaluation_id = ev.id
-      JOIN courses c ON ev.course_id = c.id
-      JOIN course_templates ct ON c.template_id = ct.id
-      JOIN users u ON e.student_id = u.id
-      WHERE c.status = 'active'
-      GROUP BY u.id, u.full_name, c.id, ct.name
-      HAVING AVG(g.grade) < 4.0
-      ORDER BY avg_grade ASC
+        u.full_name  AS student_name,
+        ct.name      AS course_name,
+        COUNT(CASE WHEN a.status = 'absent' THEN 1 END)::int AS absences,
+        c.max_absences,
+        CASE
+          WHEN COUNT(CASE WHEN a.status = 'absent' THEN 1 END) > c.max_absences THEN 'reprobado'
+          ELSE 'riesgo'
+        END AS nivel
+      FROM enrollments e
+      JOIN courses c          ON e.course_id     = c.id
+      JOIN course_templates ct ON c.template_id  = ct.id
+      JOIN users u             ON e.student_id   = u.id
+      LEFT JOIN sessions s     ON s.course_id    = c.id
+      LEFT JOIN attendance a   ON a.enrollment_id = e.id AND a.session_id = s.id
+      WHERE c.status   = 'active'
+        AND e.status  <> 'withdrawn'
+        AND c.max_absences IS NOT NULL
+      GROUP BY u.id, u.full_name, c.id, ct.name, c.max_absences
+      HAVING COUNT(CASE WHEN a.status = 'absent' THEN 1 END) >= c.max_absences
+      ORDER BY absences DESC
     `),
   ]);
 

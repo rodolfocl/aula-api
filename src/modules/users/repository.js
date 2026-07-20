@@ -14,6 +14,10 @@ export async function findById(id) {
   return db('users').select(DETAIL_FIELDS).where({ id }).first();
 }
 
+export async function findByEmail(email) {
+  return db('users').select('id').where({ email }).first();
+}
+
 export async function update(id, data) {
   const [user] = await db('users').where({ id }).update(data).returning('*');
   return user;

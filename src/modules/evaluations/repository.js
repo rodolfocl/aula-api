@@ -55,6 +55,7 @@ export async function findGradesTable(courseInstanceId) {
         this.on('g.enrollment_id', '=', 'e.id').andOn('g.evaluation_id', '=', 'ev.id')
       })
       .where('e.course_id', courseInstanceId)
+      .whereNot('e.status', 'withdrawn')
       .select('e.id as enrollment_id', 'u.full_name', 'ev.id as evaluation_id', 'g.grade')
       .orderBy('u.full_name'),
   ])

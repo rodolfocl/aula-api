@@ -1,6 +1,8 @@
 import logger from '../../config/logger.js';
 import * as repository from './repository.js';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function getAll({ includeInactive = false } = {}) {
   try {
     return await repository.findAll({ includeInactive });
@@ -51,6 +53,32 @@ export async function updateMe(id, data) {
         throw err;
       }
       allowed.full_name = name;
+    }
+
+    if ('email' in data) {
+      const email = typeof data.email === 'string' ? data.email.trim().toLowerCase() : '';
+      if (!email) {
+        const err = new Error('El correo no puede estar vacío.');
+        err.status = 400;
+        throw err;
+      }
+      if (!EMAIL_REGEX.test(email)) {
+        const err = new Error('El correo no tiene un formato válido.');
+        err.status = 400;
+        throw err;
+      }
+      if (email.length > 150) {
+        const err = new Error('El correo no puede superar los 150 caracteres.');
+        err.status = 400;
+        throw err;
+      }
+      const existing = await repository.findByEmail(email);
+      if (existing && existing.id !== id) {
+        const err = new Error('Este correo ya está registrado por otro usuario.');
+        err.status = 409;
+        throw err;
+      }
+      allowed.email = email;
     }
 
     if (!Object.keys(allowed).length) {

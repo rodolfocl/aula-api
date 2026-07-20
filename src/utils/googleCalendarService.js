@@ -62,6 +62,24 @@ export async function getAuthorizedClient() {
   return client;
 }
 
+function isInvalidGrant(err) {
+  return err.message === 'invalid_grant' || err.response?.data?.error === 'invalid_grant';
+}
+
+// Detecta invalid_grant, borra el token de BD y lanza un error 401 claro.
+export async function checkGoogleError(err) {
+  if (isInvalidGrant(err)) {
+    try { await db('google_integration').delete(); } catch (_) {}
+    logger.warn('checkGoogleError — token inválido o revocado; integración eliminada de BD');
+    const e = new Error(
+      'La autorización de Google expiró o fue revocada. Reconectá la cuenta desde el panel de administración.',
+    );
+    e.status = 401;
+    e.code = 'GOOGLE_INVALID_GRANT';
+    throw e;
+  }
+}
+
 const DAY_OF_WEEK_RRULE = {
   'Lunes':      'MO',
   'Martes':     'TU',
@@ -139,17 +157,21 @@ export async function createMeetEvent({ summary, day_of_week, start_date, end_da
     },
   };
 
-  const response = await calendar.events.insert({
-    calendarId: 'primary',
-    conferenceDataVersion: 1,
-    sendUpdates: 'all',
-    resource: event,
-  });
-
-  return {
-    google_event_id:  response.data.id,
-    google_meet_link: response.data.hangoutLink ?? null,
-  };
+  try {
+    const response = await calendar.events.insert({
+      calendarId: 'primary',
+      conferenceDataVersion: 1,
+      sendUpdates: 'all',
+      resource: event,
+    });
+    return {
+      google_event_id:  response.data.id,
+      google_meet_link: response.data.hangoutLink ?? null,
+    };
+  } catch (err) {
+    await checkGoogleError(err);
+    throw err;
+  }
 }
 
 export async function updateMeetEvent({ eventId, summary, day_of_week, start_date, end_date, schedule_time, teacherEmail }) {
@@ -173,16 +195,20 @@ export async function updateMeetEvent({ eventId, summary, day_of_week, start_dat
     patch.attendees = teacherEmail ? [{ email: teacherEmail }] : [];
   }
 
-  const response = await calendar.events.patch({
-    calendarId: 'primary',
-    eventId,
-    conferenceDataVersion: 1,
-    sendUpdates: 'all',
-    resource: patch,
-  });
-
-  return {
-    google_event_id:  response.data.id,
-    google_meet_link: response.data.hangoutLink ?? null,
-  };
+  try {
+    const response = await calendar.events.patch({
+      calendarId: 'primary',
+      eventId,
+      conferenceDataVersion: 1,
+      sendUpdates: 'all',
+      resource: patch,
+    });
+    return {
+      google_event_id:  response.data.id,
+      google_meet_link: response.data.hangoutLink ?? null,
+    };
+  } catch (err) {
+    await checkGoogleError(err);
+    throw err;
+  }
 }

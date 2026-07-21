@@ -41,7 +41,7 @@ export async function login({ email, password }) {
     const token = jwt.sign(
       { sub: user.id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' },
+      { expiresIn: '8h' },
     );
 
     return { token };
@@ -63,12 +63,16 @@ export async function forgotPassword({ email }) {
       await repository.setResetToken(user.email, hashedToken, expiresAt);
 
       const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
-      await sendPasswordResetEmail(user.email, user.full_name, resetLink);
+      try {
+        await sendPasswordResetEmail(user.email, user.full_name, resetLink);
+      } catch (emailErr) {
+        logger.error({ emailErr, email: user.email }, 'forgotPassword — token guardado pero fallo al enviar email');
+      }
     }
 
     return { message: 'Si el email existe, recibirás un link de recuperación en tu bandeja.' };
   } catch (err) {
-    logger.error({ err, email }, 'forgotPassword — error al enviar email de recuperación');
+    logger.error({ err, email }, 'forgotPassword — error inesperado');
     throw err;
   }
 }

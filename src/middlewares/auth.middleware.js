@@ -11,11 +11,11 @@ export function authMiddleware(req, res, next) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
 
-    // Sliding session: renueva la ventana de 24h en cada request autenticada exitosa
+    // Sliding session: renueva la ventana de 1h en cada request autenticada exitosa
     const renewed = jwt.sign(
       { sub: decoded.sub, email: decoded.email },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' },
+      { expiresIn: '8h' },
     );
     res.setHeader('X-Renewed-Token', renewed);
 

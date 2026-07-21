@@ -19,8 +19,8 @@ export async function sendPasswordResetEmail(email, fullName, resetLink) {
 
   if (error) {
     logger.error(
-      { to: email, subject, errorName: error.name, errorMessage: error.message },
-      'sendPasswordResetEmail — fallo al enviar',
+      { to: email, subject },
+      `sendPasswordResetEmail — fallo al enviar | ${error.name}: ${error.message}`,
     );
     throw new Error(`Resend error: ${error.message}`);
   }

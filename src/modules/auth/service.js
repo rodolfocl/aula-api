@@ -5,7 +5,7 @@ import logger from '../../config/logger.js';
 import * as repository from './repository.js';
 import { sendPasswordResetEmail } from '../../utils/email.js';
 
-export async function register({ full_name, email, password, phone, photo_url, roles }) {
+export async function register({ full_name, email, password, phone, photo_url, avatar, roles }) {
   try {
     const existing = await repository.findByEmail(email);
     if (existing) {
@@ -15,7 +15,7 @@ export async function register({ full_name, email, password, phone, photo_url, r
     }
 
     const password_hash = await bcrypt.hash(password, 10);
-    return await repository.create({ full_name, email, password_hash, phone, photo_url, roles });
+    return await repository.create({ full_name, email, password_hash, phone, avatar: avatar ?? photo_url, roles });
   } catch (err) {
     if (!err.status) logger.error({ err, email }, 'register — error inesperado');
     throw err;

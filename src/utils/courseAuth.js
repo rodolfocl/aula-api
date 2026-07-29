@@ -16,7 +16,7 @@ export async function getUserRoles(userId) {
 
 export async function assertOwnerOrAdmin(req, courseInstanceId) {
   const roles = await getUserRoles(req.user.sub);
-  if (roles.includes('administrador')) return;
+  if (roles.includes('administrador') || roles.includes('profesor')) return;
 
   const instance = await db('courses').where({ id: courseInstanceId }).select('teacher_id').first();
   if (!instance || instance.teacher_id !== req.user.sub) {

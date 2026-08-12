@@ -40,6 +40,7 @@ export async function getSummary({ teacherId } = {}) {
       .first(),
     db('enrollments as e')
       .join('courses as c', 'e.course_id', 'c.id')
+      .join('users as su', 'su.id', 'e.student_id')
       .where('c.status', 'active')
       .where('e.status', 'in_progress')
       .countDistinct('e.student_id as count')

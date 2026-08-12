@@ -12,7 +12,7 @@ export async function findActiveInstancesInRange(rangeStart, rangeEnd, teacherId
       'ci.day_of_week',
       'ci.start_date',
       'ci.end_date',
-      db.raw(`(SELECT COUNT(*) FROM enrollments e WHERE e.course_id = ci.id AND e.status <> 'withdrawn') AS student_count`),
+      db.raw(`(SELECT COUNT(*) FROM enrollments e JOIN users su ON su.id = e.student_id WHERE e.course_id = ci.id AND e.status <> 'withdrawn') AS student_count`),
     )
     .where('ci.status', 'active')
     .whereNotNull('ci.day_of_week')

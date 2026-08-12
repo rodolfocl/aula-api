@@ -33,3 +33,19 @@ export async function update(id, data) {
     throw err;
   }
 }
+
+export async function deleteById(id) {
+  try {
+    const session = await repository.findById(id);
+    if (!session) {
+      const err = new Error('Sesión no encontrada');
+      err.status = 404;
+      throw err;
+    }
+    await repository.deleteById(id);
+    return session;
+  } catch (err) {
+    if (!err.status) logger.error({ err, id }, 'deleteById — error al eliminar sesión');
+    throw err;
+  }
+}

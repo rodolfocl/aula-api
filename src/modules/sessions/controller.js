@@ -31,3 +31,13 @@ export async function update(req, res, next) {
     res.json(session);
   } catch (err) { next(err); }
 }
+
+export async function remove(req, res, next) {
+  try {
+    const courseInstanceId = await getCourseInstanceIdFromSession(req.params.id);
+    if (courseInstanceId != null) await assertOwnerOrAdmin(req, courseInstanceId);
+    await service.deleteById(req.params.id);
+    res.locals.logSummary = `eliminó sesión: ${req.params.id}`;
+    res.status(204).send();
+  } catch (err) { next(err); }
+}

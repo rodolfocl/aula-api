@@ -9,5 +9,6 @@ router.use(authMiddleware);
 router.get('/instance/:instanceId', controller.getByInstance);
 router.post('/', controller.create);
 router.patch('/:id', controller.update);
+router.delete('/:id', controller.remove);
 
 export default router;

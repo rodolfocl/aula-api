@@ -1,6 +1,5 @@
 import logger from '../../config/logger.js';
 import * as repository from './repository.js';
-import * as sessionsRepo from '../sessions/repository.js';
 import db from '../../db/db.js';
 import { createMeetEvent, updateMeetEvent } from '../../utils/googleCalendarService.js';
 import { createFolder } from '../../utils/googleDriveService.js';
@@ -33,10 +32,7 @@ export async function getById(id) {
 const DAYS_OF_WEEK = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 const ALLOWED_FIELDS = ['template_id', 'teacher_id', 'year', 'period', 'start_date', 'end_date', 'max_absences', 'status', 'close_reason', 'is_historical', 'day_of_week', 'schedule_time'];
 
-const SCHEDULE_FIELDS = new Set(['start_date', 'end_date', 'day_of_week']);
-const MEET_FIELDS     = new Set(['start_date', 'end_date', 'day_of_week', 'schedule_time', 'teacher_id']);
-
-const DAY_MAP = { 'Lunes': 1, 'Martes': 2, 'Miércoles': 3, 'Jueves': 4, 'Viernes': 5 };
+const MEET_FIELDS = new Set(['start_date', 'end_date', 'day_of_week', 'schedule_time', 'teacher_id']);
 
 function sanitize(data) {
   const s = Object.fromEntries(ALLOWED_FIELDS.filter(k => k in data).map(k => [k, data[k]]));
@@ -47,60 +43,6 @@ function sanitize(data) {
     s.day_of_week = DAYS_OF_WEEK.includes(s.day_of_week) ? s.day_of_week : null;
   }
   return s;
-}
-
-function calcularFechasEsperadas(instance) {
-  const dayIndex = DAY_MAP[instance.day_of_week];
-  if (dayIndex === undefined || !instance.start_date || !instance.end_date) return [];
-
-  const from = new Date(instance.start_date);
-  from.setUTCHours(0, 0, 0, 0);
-  const to = new Date(instance.end_date);
-  to.setUTCHours(23, 59, 59, 999);
-
-  const dates = [];
-  const cursor = new Date(from);
-  while (cursor.getUTCDay() !== dayIndex) cursor.setUTCDate(cursor.getUTCDate() + 1);
-  while (cursor <= to) {
-    dates.push(cursor.toISOString().slice(0, 10));
-    cursor.setUTCDate(cursor.getUTCDate() + 7);
-  }
-  return dates;
-}
-
-function toDateStr(scheduledAt) {
-  if (scheduledAt instanceof Date) return scheduledAt.toISOString().slice(0, 10);
-  return String(scheduledAt).slice(0, 10);
-}
-
-async function syncSessions(instance) {
-  const [existing, protectedIds] = await Promise.all([
-    sessionsRepo.findByInstance(instance.id),
-    sessionsRepo.findProtectedIds(instance.id),
-  ]);
-
-  const protectedSet   = new Set(protectedIds);
-  const expectedDates  = calcularFechasEsperadas(instance);
-  const expectedSet    = new Set(expectedDates);
-  const existingByDate = new Map(existing.map(s => [toDateStr(s.scheduled_at), s]));
-
-  const toDelete = existing.filter(s =>
-    !expectedSet.has(toDateStr(s.scheduled_at)) && !protectedSet.has(s.id)
-  );
-  const toAdd = expectedDates.filter(d => !existingByDate.has(d));
-
-  await Promise.all([
-    ...toDelete.map(s => sessionsRepo.deleteById(s.id)),
-    ...toAdd.map(d => sessionsRepo.create({
-      course_id:    instance.id,
-      scheduled_at: new Date(d + 'T12:00:00Z'),
-    })),
-  ]);
-
-  logger.info(
-    { instanceId: instance.id, eliminadas: toDelete.length, agregadas: toAdd.length },
-    'syncSessions — completado'
-  );
 }
 
 async function getTeacherEmail(teacherId) {
@@ -195,13 +137,6 @@ export async function update(id, data) {
     await getById(id);
     const sanitized = sanitize(data);
     const instance  = await repository.update(id, sanitized);
-
-    const needsSync = Object.keys(sanitized).some(k => SCHEDULE_FIELDS.has(k));
-    if (needsSync) {
-      syncSessions(instance).catch(err =>
-        logger.error({ err, id }, 'update — error al sincronizar sesiones')
-      );
-    }
 
     const meetChanged = Object.keys(sanitized).some(k => MEET_FIELDS.has(k));
     if (meetChanged && hasScheduleData(instance)) {

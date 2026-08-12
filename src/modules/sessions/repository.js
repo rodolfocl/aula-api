@@ -24,14 +24,3 @@ export async function update(id, data) {
 export async function deleteById(id) {
   return db('sessions').where({ id }).delete();
 }
-
-// IDs de sesiones del curso que ya tienen al menos un registro de asistencia con status
-export async function findProtectedIds(courseId) {
-  const rows = await db('sessions as s')
-    .join('attendance as a', 'a.session_id', 's.id')
-    .where('s.course_id', courseId)
-    .whereNotNull('a.status')
-    .distinct('s.id')
-    .select('s.id');
-  return rows.map(r => r.id);
-}
